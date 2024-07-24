@@ -49,6 +49,7 @@ void merge (int v[], int ini, int m, int fim, uint64_t *comp){
 
         return;
     }
+
     int k = 0;
     int i = ini;
     int j = m + 1;
@@ -68,6 +69,7 @@ void merge (int v[], int ini, int m, int fim, uint64_t *comp){
     }
 
     copiar(v, u, ini, fim);
+    free(u);
 
     return;
 }
@@ -165,6 +167,8 @@ void max_heapifySR(int vetor[], int i, int n, uint64_t *comp){
         }
     }
 
+    free(h);
+
     return;
 }
 
@@ -184,7 +188,7 @@ void construir_max_heap(int vetor[], int fim, uint64_t *comp, int aux){
     return;
 }
 
-void heapSortAux(int vetor[], int inicio, int fim, uint64_t *comp){
+void heapSortAux(int vetor[], int inicio , int fim, uint64_t *comp){
     construir_max_heap(vetor, fim, comp, 1);
     for (int i = fim; i > 0; i--){
         trocar(vetor, 0, i);
@@ -222,32 +226,29 @@ uint64_t heapSort(int v[], size_t tam) {
     return comp;
 }
 
-uint64_t mergeSortSR(int v[], size_t tam) {
-    struct pilha *ms = pilha_cria(tam); // Criação da pilha com capacidade igual ao tamanho do array
-    if (ms == NULL)
-        return -1;
+int min(int x, int y) { 
+    return (x < y) ? x : y; 
+}
 
-    int a, b, m, aux;
+/* Algoritmo inspirado no livro Algorithms 4ed. SEDGEWICK R. & KEVIN W. */
+uint64_t mergeSortSR(int v[], size_t tam) {
     uint64_t comp = 0;
 
-    push(ms, 0);
-    push(ms, tam - 1);
+   int inicio;
+ 
+   for (int i = 1; i <= tam - 1; i = 2 * i)
+   {
+       for (inicio = 0; inicio < tam - 1; inicio  += 2 * i)
+       {
+           int mid = min(inicio  + i - 1, tam-1);
+ 
+           int right_end = min(inicio  + 2*i - 1, tam-1);
+ 
+           merge(v, inicio , mid, right_end, &comp);
+       }
+   }
 
-    while (!pilha_vazia(ms)) {
-        pop(ms, &b);
-        pop(ms, &a);
-
-        if (a < b) {
-            m = (a + b) / 2;
-            push(ms, a);
-            push(ms, m);
-            push(ms, m + 1);
-            push(ms, b);
-            merge(v, a, m, b); // Chamada para mesclar as partes ordenadas
-        }
-    }
-
-    return comp;
+   return comp;
 }
 
 uint64_t quickSortSR(int v[], size_t tam) {
@@ -264,13 +265,15 @@ uint64_t quickSortSR(int v[], size_t tam) {
         if(pop(q, &b) && pop(q, &a)){
             if (a < b){
                 int m = particionar(v,a,b, &comp);
-                push(q,a);
-                push(q,m-1);
-                push(q,m+1);
-                push(q,b);
+                push(q, a);
+                push(q, m - 1);
+                push(q, m + 1);
+                push(q, b);
             }
         }
     }
+
+    free(q);
 
     return comp;
 }
